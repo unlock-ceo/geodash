@@ -1,39 +1,45 @@
 # GeoDash — Outcomes
 
-## O1: App loads and renders a map
-- The app starts with `npm run dev` or `pnpm dev`
-- A map is visible in the browser within 3 seconds
-- The map is interactive (pan, zoom, rotate)
-- **Verification:** Screenshot shows a rendered map with controls
+## O1: The demo makes you stop and stare
+- Opening the app triggers the demo sequence automatically
+- Act 1 (globe with shipping/flight particles) renders within 3s
+- Camera transitions are smooth and cinematic (no jerky interpolation)
+- At least 4 distinct demo acts play in sequence
+- **Verification:** Screen recording of full demo sequence, noting any stutter or pop-in
 
-## O2: Drag-and-drop data loading works
-- Dropping a GeoJSON file onto the map renders the features
-- Dropping a CSV with lat/lon columns renders points
-- An error message appears for unsupported file types
-- **Verification:** Screenshot shows rendered GeoJSON features on the map
+## O2: Particles feel physical, not plotted
+- The particle engine renders 100K+ particles at 60fps
+- Particles have visible trails that fade over time
+- At least one demo scene shows particles with physics behaviour (flow, gravity, or pulse)
+- Particle transitions between views are animated (morph, not cut)
+- **Verification:** Screenshot of particle flow scene + FPS counter showing 60fps
 
-## O3: 3D visualisation works
-- Extruded polygons render with height based on a data attribute
-- 3D hex bins render with height aggregation
-- Arc layers render between two points
-- Camera can orbit in 3D (pitch/bearing controls)
-- **Verification:** Screenshot shows 3D extruded features with perspective
+## O3: The globe-to-city transition is seamless
+- Camera moves from orbital globe to street-level NYC in one continuous motion
+- No mode switch, loading screen, or visual discontinuity during the dive
+- Motion blur visible during fast camera movement
+- **Verification:** Screen recording of the globe-to-NYC transition
 
-## O4: Demo mode showcases capabilities
-- A demo/tour launches automatically or via a button
-- At least 3 distinct demo datasets are shown
-- Transitions between datasets are smooth
-- Live data (e.g. earthquake feed or ISS tracker) updates in real-time
-- **Verification:** Screenshots of at least 3 different demo scenes
+## O4: Live data actually updates
+- At least one data source updates in real time without page reload
+- USGS earthquake feed or ISS tracker shows new data arriving
+- Visual indication of data freshness (pulse, fade-in, timestamp)
+- **Verification:** Screenshots 30 seconds apart showing new data points
 
-## O5: Multiple visualisation modes exist
-- At least 3 of: choropleth, heatmap, cluster, hex bin, arc, point cloud
-- Switching between modes works without page reload
-- Each mode renders data correctly
-- **Verification:** Screenshots showing different visualisation modes
+## O5: Drop any geo file and it just works
+- Drag-and-drop a GeoJSON file → features render on the map within 2s
+- Drag-and-drop a CSV with lat/lon → points render automatically
+- The system auto-selects a sensible visualisation (not just raw dots)
+- **Verification:** Screenshot of auto-visualised dropped data
 
-## O6: The app is performant
-- 10,000+ points render without visible lag
-- Pan and zoom maintain 30fps+
-- Large files show a loading indicator
-- **Verification:** Console performance metrics or smooth interaction in recording
+## O6: It sounds as good as it looks
+- Sonification produces audible output when enabled
+- Spatial audio pans with mouse position or data location
+- Sound responds to data density or attribute values
+- **Verification:** Description of audio behaviour during demo playback
+
+## O7: Post-processing makes it cinematic
+- Bloom effect visible on bright data points against dark background
+- At least one scene uses depth-of-field blur
+- Colour grading preset visibly changes the aesthetic
+- **Verification:** Before/after screenshots with effects on vs off
