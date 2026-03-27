@@ -32,11 +32,12 @@
 - The system auto-selects a sensible visualisation (not just raw dots)
 - **Verification:** Screenshot of auto-visualised dropped data
 
-## O6: It sounds as good as it looks
-- Sonification produces audible output when enabled
-- Spatial audio pans with mouse position or data location
-- Sound responds to data density or attribute values
-- **Verification:** Description of audio behaviour during demo playback
+## O6: Geospatial accuracy is correct
+- Coordinate display under cursor shows lat/lon values
+- Loaded features align with their real-world positions (no visible offset)
+- Scale bar displays and is correct for the current zoom/latitude
+- Measurement tool produces geodesic distances (not planar)
+- **Verification:** Screenshot showing coordinate readout over a known landmark
 
 ## O7: Post-processing makes it cinematic
 - Bloom effect visible on bright data points against dark background

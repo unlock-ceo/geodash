@@ -34,7 +34,6 @@ Drop any geo data and the system doesn't just detect the format — it understan
 - **Data:** Apache Arrow for columnar data, Web Workers for parsing
 - **Spatial:** H3 for hexagonal aggregation, Turf.js for spatial ops
 - **Animation:** Custom easing library for cinematic camera movements
-- **Audio:** Web Audio API for data sonification
 - **State:** Zustand
 - **Styling:** Tailwind CSS 4
 
@@ -106,14 +105,18 @@ Auto-detect and parse in Web Workers. Progressive loading with visual feedback.
 - Live endpoint (polling URL with configurable interval)
 - WebSocket stream
 
-### 6. Sonification
+### 6. Geospatial Accuracy
 
-Data you can hear. Not a gimmick — a genuine analytical tool.
+This is a geospatial tool, not a particle toy. Every visualisation must be spatially correct.
 
-- **Spatial audio:** Pan position maps to geographic position. Move your mouse and hear where the data is dense.
-- **Pitch mapping:** Map a numeric attribute to pitch. Sweep across a choropleth and hear the gradient.
-- **Event sounds:** Real-time data events produce tones. Earthquake magnitude maps to volume + bass. Sensor alerts produce distinct timbres.
-- **Ambient soundscape:** A subtle generative soundtrack that responds to what's on screen. Dense urban data = complex layered sounds. Ocean data = flowing, sparse tones. Adjustable or mutable.
+- **CRS awareness:** Auto-detect coordinate reference systems (EPSG codes from .prj files, GeoJSON is always WGS84, CSV columns sniffed for OSGB/UTM/lat-lon). Reproject everything to Web Mercator for display, but store and export in source CRS.
+- **Datum-correct rendering:** No naive lat/lon → pixel. All projection math via proj4js or equivalent. Distances, areas, and buffers computed geodesically (great circle), not planar.
+- **Scale fidelity:** At any zoom level, the rendered features must align with their real-world positions to sub-pixel accuracy. No drift, no offset, no "close enough."
+- **3D terrain accuracy:** Elevation data (DEM/GeoTIFF) rendered as true 3D mesh with correct vertical exaggeration controls (1x = real scale, adjustable). Data layers drape onto terrain following actual elevation, not floating above a flat plane.
+- **Coordinate display:** Always show coordinates under cursor in both WGS84 (lat/lon) and the source CRS. Show scale bar that's correct at the current latitude.
+- **Measurement tools:** Distance (geodesic, not Euclidean), area (geodesic), bearing. Results in metres/km with accuracy appropriate to the source data precision.
+- **Topology awareness:** Understand polygon winding order, handle antimeridian crossing, render features that span the dateline correctly. Multi-part geometries render as unified features.
+- **Attribution and provenance:** Every loaded dataset shows its CRS, feature count, bounding box, attribute schema. No mystery data.
 
 ### 7. Visual Effects Pipeline
 
@@ -135,7 +138,7 @@ The demo is the product. If the demo doesn't make someone's jaw drop, nothing el
 
 Open on a dark globe, slowly rotating. Silence. Then — particle trails begin streaking across oceans: global shipping routes materialising as flowing rivers of light. 50,000 vessel positions from AIS data, rendered as particles with velocity-based trails. The ocean surface comes alive with movement. Subtle ambient audio fades in — deep, oceanic.
 
-Camera slowly pulls back to reveal the full globe. Flight paths arc overhead as luminous curves — 67,000 routes, each arc pulsing with a single travelling particle showing direction. The globe looks like a living organism with a nervous system.
+Camera slowly pulls back to reveal the full globe. Flight paths arc overhead as luminous curves — 67,000 routes, each arc pulsing with a single travelling particle showing direction. The globe looks like a living organism with a nervous system. All positions are geodesically accurate — shipping lanes follow real routes, not straight lines.
 
 ### Act 2: "Pulse of the City" (NYC, 45s)
 
@@ -143,7 +146,7 @@ Camera executes a cinematic dolly dive from orbital to street level — continuo
 
 NYC taxi pickups materialise as particles falling from the sky, settling into a hex grid that extrudes upward based on density. The hex grid breathes — heights pulse with time-of-day animation compressed into 10 seconds. Dawn: quiet, short hexes. Rush hour: explosive growth, hexes towering. Evening: redistribution toward entertainment districts. The colour shifts from cool blue (morning) through amber (afternoon) to hot pink (nightlife).
 
-Sound: each hex emits a tone proportional to its height. The city literally hums louder during rush hour.
+Visual: data density pulses as a glow halo around each hex column — the city visibly throbs during rush hour.
 
 ### Act 3: "Reading the Earth" (Environment, 45s)
 
@@ -199,4 +202,4 @@ Technical minimums:
 - All demo datasets load and render without errors
 - WebGPU path works in Chrome. WebGL2 fallback works in Firefox/Safari.
 - No visible pop-in, flickering, or z-fighting in 3D views
-- Sonification works with headphones (spatial audio)
+- Coordinate readout matches known reference points (e.g. Statue of Liberty at 40.6892°N, 74.0445°W)
