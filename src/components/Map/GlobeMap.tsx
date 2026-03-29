@@ -80,7 +80,20 @@ export default function GlobeMap() {
     };
     map.on('resize', onResize);
 
+    // Detect user interaction to disable scripted camera (prevents jitter).
+    // Once set, the flag stays true — the demo continues but won't override the camera.
+    const container = map.getContainer();
+    const onUserInteract = () => {
+      useCameraStore.getState().setUserInteracting(true);
+    };
+    container.addEventListener('mousedown', onUserInteract);
+    container.addEventListener('wheel', onUserInteract);
+    container.addEventListener('touchstart', onUserInteract);
+
     return () => {
+      container.removeEventListener('mousedown', onUserInteract);
+      container.removeEventListener('wheel', onUserInteract);
+      container.removeEventListener('touchstart', onUserInteract);
       map.off('resize', onResize);
       map.remove();
       mapRef.current = null;

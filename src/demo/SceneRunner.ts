@@ -8,6 +8,7 @@
 // ---------------------------------------------------------------------------
 
 import { CinematicCamera } from '../camera/CinematicCamera';
+import { useCameraStore } from '../store/cameraStore';
 import type { SceneContext, SceneDescriptor } from './types';
 
 export class SceneRunner {
@@ -67,8 +68,10 @@ export class SceneRunner {
         const elapsed = performance.now() - this.startTime;
         const progress = Math.min(elapsed / scene.duration, 1);
 
-        // Evaluate and apply camera shot if one is defined
-        if (scene.camera) {
+        // Evaluate and apply camera shot if one is defined.
+        // Skip jumpTo when user is interacting — prevents jitter from
+        // competing with user input while allowing particles to continue.
+        if (scene.camera && !useCameraStore.getState().userInteracting) {
           const cam = CinematicCamera.evaluate(scene.camera, progress);
           try {
             ctx.map.jumpTo({
