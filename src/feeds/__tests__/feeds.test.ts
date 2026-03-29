@@ -48,12 +48,11 @@ describe('parseUSGSResponse', () => {
 describe('parseISSResponse', () => {
   it('parses ISS position response into a GeoDataset', () => {
     const mockData = {
-      message: 'success',
+      latitude: 51.5074,
+      longitude: -0.1278,
+      altitude: 408.05,
+      velocity: 27553.57,
       timestamp: 1700000000,
-      iss_position: {
-        latitude: '51.5074',
-        longitude: '-0.1278',
-      },
     };
 
     const dataset = parseISSResponse(mockData);
@@ -64,6 +63,8 @@ describe('parseISSResponse', () => {
     expect((dataset.features[0]!.geometry as { coordinates: number[] }).coordinates[0]).toBeCloseTo(-0.1278);
     expect((dataset.features[0]!.geometry as { coordinates: number[] }).coordinates[1]).toBeCloseTo(51.5074);
     expect(dataset.features[0]!.properties.name).toBe('International Space Station');
+    expect(dataset.features[0]!.properties.altitude).toBe(408.05);
+    expect(dataset.features[0]!.properties.velocity).toBe(27553.57);
   });
 });
 

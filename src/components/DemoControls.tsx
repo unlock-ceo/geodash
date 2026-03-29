@@ -10,8 +10,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDemoStore } from '../store/demoStore';
 import { getOrchestrator } from '../App';
 
-const ACT_COUNT = 5;
-
 export default function DemoControls() {
   const phase = useDemoStore((s) => s.phase);
   const currentAct = useDemoStore((s) => s.currentAct);
@@ -180,7 +178,7 @@ export default function DemoControls() {
 
       {/* Act indicator dots */}
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        {Array.from({ length: ACT_COUNT }, (_, i) => (
+        {Array.from({ length: getOrchestrator()?.getActCount() ?? 5 }, (_, i) => (
           <div
             key={i}
             style={{

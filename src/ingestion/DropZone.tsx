@@ -133,6 +133,7 @@ export default function DropZone() {
     switch (result.status) {
       case 'complete':
         useDataStore.getState().addDataset(result.dataset);
+        useDataStore.getState().setActiveDataset(result.dataset.id);
         renderDatasetAsParticles(result.dataset);
         flyToBounds(result.dataset.bounds.sw, result.dataset.bounds.ne);
         addToast(
@@ -142,6 +143,7 @@ export default function DropZone() {
         break;
       case 'partial':
         useDataStore.getState().addDataset(result.dataset);
+        useDataStore.getState().setActiveDataset(result.dataset.id);
         renderDatasetAsParticles(result.dataset);
         flyToBounds(result.dataset.bounds.sw, result.dataset.bounds.ne);
         addToast(

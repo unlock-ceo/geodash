@@ -95,13 +95,46 @@ function isGeometry(obj: GeoJSON): boolean {
 const LAT_NAMES = ['lat', 'latitude', 'y', 'lat_y', 'point_y'];
 const LON_NAMES = ['lng', 'lon', 'longitude', 'x', 'long', 'lat_x', 'point_x'];
 
+/** Quote-aware CSV field split (handles RFC 4180 quoted fields with commas). */
+function splitCSVRow(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuote = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i]!;
+    if (inQuote) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          // Escaped quote
+          current += '"';
+          i++;
+        } else {
+          inQuote = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuote = true;
+    } else if (ch === ',') {
+      fields.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  fields.push(current);
+  return fields;
+}
+
 function parseCSV(text: string, fileName: string): ParseResult {
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) {
     return { status: 'empty', reason: 'CSV has no data rows' };
   }
 
-  const headers = lines[0]!.split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
+  const headers = splitCSVRow(lines[0]!).map((h) => h.trim());
   const headersLower = headers.map((h) => h.toLowerCase());
 
   // Detect lat/lon columns
@@ -116,7 +149,7 @@ function parseCSV(text: string, fileName: string): ParseResult {
   const warnings: string[] = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i]!.split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+    const cols = splitCSVRow(lines[i]!).map((c) => c.trim());
     const lat = parseFloat(cols[latIdx] ?? '');
     const lon = parseFloat(cols[lonIdx] ?? '');
 

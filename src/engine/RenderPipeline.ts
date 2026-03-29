@@ -42,8 +42,8 @@ export class RenderPipeline {
     // Initialise internal stages
     this.particleSystem.init(gl);
 
-    // Create framebuffer for post-processing (stub -- not wired yet)
-    this.createFramebuffer(gl);
+    // FBO creation is deferred until the first addPostProcess() call
+    // to avoid wasting ~40 MB of GPU memory when post-processing is unused.
   }
 
   /**
@@ -108,8 +108,8 @@ export class RenderPipeline {
       pass.resize(width, height);
     }
 
-    // Recreate FBO attachments at new size
-    if (this.gl) {
+    // Recreate FBO attachments at new size only if post-processing is active
+    if (this.gl && this.postProcessPasses.length > 0) {
       this.destroyFramebuffer(this.gl);
       this.createFramebuffer(this.gl);
     }
@@ -140,8 +140,13 @@ export class RenderPipeline {
   // -----------------------------------------------------------------------
 
   addPostProcess(pass: PostProcessPass): void {
+    const needsFBO = this.postProcessPasses.length === 0;
     this.postProcessPasses.push(pass);
     if (this.gl) {
+      // Lazily create FBO on first post-process pass
+      if (needsFBO && !this.frameBuffer) {
+        this.createFramebuffer(this.gl);
+      }
       pass.init(this.gl);
       pass.resize(this.width, this.height);
     }

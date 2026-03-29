@@ -1,28 +1,29 @@
 // ---------------------------------------------------------------------------
 // ISS Tracker Feed Provider
 // ---------------------------------------------------------------------------
-// Fetches from http://api.open-notify.org/iss-now.json
-// CORS OK — no proxy needed.
+// Fetches from https://api.wheretheiss.at/v1/satellites/25544
+// HTTPS + CORS OK — works on production deployments without mixed-content issues.
+// (Previously used http://api.open-notify.org which is HTTP-only and blocked
+// by mixed-content policy on HTTPS-hosted deployments.)
 // ---------------------------------------------------------------------------
 
 import type { FeedProvider } from './types';
 import type { GeoDataset } from '../types/geo';
 
-const ISS_URL = 'http://api.open-notify.org/iss-now.json';
+const ISS_URL = 'https://api.wheretheiss.at/v1/satellites/25544';
 
-interface ISSResponse {
-  message: string;
+export interface ISSResponse {
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  velocity: number;
   timestamp: number;
-  iss_position: {
-    latitude: string;
-    longitude: string;
-  };
 }
 
 /** Parse ISS API response into a GeoDataset. */
 export function parseISSResponse(data: ISSResponse): GeoDataset {
-  const lat = parseFloat(data.iss_position.latitude);
-  const lng = parseFloat(data.iss_position.longitude);
+  const lat = data.latitude;
+  const lng = data.longitude;
 
   return {
     id: 'iss-tracker',
@@ -36,6 +37,8 @@ export function parseISSResponse(data: ISSResponse): GeoDataset {
           timestamp: data.timestamp,
           latitude: lat,
           longitude: lng,
+          altitude: data.altitude,
+          velocity: data.velocity,
         },
       },
     ],
@@ -55,7 +58,6 @@ export const issTrackerProvider: FeedProvider = {
     const response = await fetch(ISS_URL);
     if (!response.ok) throw new Error(`ISS API HTTP ${response.status}`);
     const data: ISSResponse = await response.json();
-    if (data.message !== 'success') throw new Error('ISS API returned non-success');
     return parseISSResponse(data);
   },
 };

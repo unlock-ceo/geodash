@@ -69,6 +69,7 @@ export class ParticleLayer implements maplibregl.CustomLayerInterface {
     const savedProgram = gl2.getParameter(gl2.CURRENT_PROGRAM) as WebGLProgram | null;
     const savedVao = gl2.getParameter(gl2.VERTEX_ARRAY_BINDING) as WebGLVertexArrayObject | null;
     const savedArrayBuffer = gl2.getParameter(gl2.ARRAY_BUFFER_BINDING) as WebGLBuffer | null;
+    const savedFramebuffer = gl2.getParameter(gl2.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
     const savedBlendEnabled = gl2.isEnabled(gl2.BLEND);
     const savedDepthMask = gl2.getParameter(gl2.DEPTH_WRITEMASK) as boolean;
     const savedBlendSrcRGB = gl2.getParameter(gl2.BLEND_SRC_RGB) as number;
@@ -84,6 +85,7 @@ export class ParticleLayer implements maplibregl.CustomLayerInterface {
     gl2.useProgram(savedProgram);
     gl2.bindVertexArray(savedVao);
     gl2.bindBuffer(gl2.ARRAY_BUFFER, savedArrayBuffer);
+    gl2.bindFramebuffer(gl2.FRAMEBUFFER, savedFramebuffer);
     gl2.depthMask(savedDepthMask);
     gl2.activeTexture(savedActiveTexture);
 
