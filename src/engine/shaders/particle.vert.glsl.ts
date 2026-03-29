@@ -24,12 +24,11 @@ void main() {
   // Skip dead particles by collapsing them to zero size
   float alive = step(0.001, a_lifetime) * step(a_age, a_lifetime);
 
-  vec4 viewPos = u_view * vec4(a_position, 1.0);
-  gl_Position = u_projection * viewPos;
+  gl_Position = u_projection * u_view * vec4(a_position, 1.0);
 
-  // Distance-based point size attenuation
-  float dist = -viewPos.z;
-  float distAtten = 300.0 / max(dist, 0.1);
+  // Perspective-correct point size: gl_Position.w increases with distance from camera.
+  // MapLibre's projMatrix encodes the full view+projection transform, so w is reliable.
+  float distAtten = 1.0 / max(gl_Position.w, 0.001);
 
   // Age-based fade: full size at birth, shrink slightly near death
   float lifeRatio = a_age / max(a_lifetime, 0.001);

@@ -3,9 +3,6 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useCameraStore } from '../../store/cameraStore';
 import { ParticleLayer } from '../../engine/ParticleLayer';
-import { BloomPass } from '../../engine/postprocess/BloomPass';
-import { DepthOfField } from '../../engine/postprocess/DepthOfField';
-import { ColorGrading } from '../../engine/postprocess/ColorGrading';
 
 /** Singleton reference so other systems can access the map instance. */
 let _mapInstance: maplibregl.Map | null = null;
@@ -55,11 +52,12 @@ export default function GlobeMap() {
     map.on('load', () => {
       map.addLayer(particleLayer);
 
-      // Wire post-processing passes — FBO is lazily created on first addPostProcess()
-      const pipeline = particleLayer.getPipeline();
-      pipeline.addPostProcess(new BloomPass());
-      pipeline.addPostProcess(new DepthOfField());
-      pipeline.addPostProcess(new ColorGrading());
+      // Post-processing disabled: the pipeline has three compounding bugs:
+      // 1. Ping-pong uses a single buffer — intermediate passes read/write the same texture (UB).
+      // 2. Final pass renders with blending OFF, overwriting MapLibre's map tiles.
+      // 3. Final pass targets framebuffer null, but MapLibre may use an offscreen FBO.
+      // Particles now render via the direct path (additive blending into MapLibre's active FBO).
+      // TODO: Redesign post-processing with MapLibre-aware compositing.
     });
 
     map.on('move', () => {
