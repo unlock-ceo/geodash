@@ -96,12 +96,18 @@ export function generateUKRiverEmitters(): EmitterConfig[] {
 
       emitters.push({
         position: [mx, my, mz],
+        positionSpread: [0.000015, 0.000015, 0],
         rate: 5,
         lifetime: 8,
+        lifetimeSpread: 2,
         color: river.color,
+        colorSpread: [0.03, 0.03, 0.03, 0.05],
         size: 2.5,
+        sizeSpread: 0.5,
         velocity: [vx, vy, 0],
-        spread: 0.15,
+        velocitySpread: [Math.abs(vx) * 0.15, Math.abs(vy) * 0.15, 0],
+        mass: 1,
+        massSpread: 0,
       });
     }
   }

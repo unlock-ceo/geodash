@@ -60,14 +60,21 @@ function emittersAlongPath(
     const vx = len > 0 ? (dx / len) * options.velocityScale : 0;
     const vy = len > 0 ? (dy / len) * options.velocityScale : 0;
 
+    const spread = 0.3;
     emitters.push({
       position: [mx, my, mz],
+      positionSpread: [spread * 0.0001, spread * 0.0001, 0],
       rate: options.rate,
       lifetime: options.lifetime,
+      lifetimeSpread: options.lifetime * 0.2,
       color: options.particleColor,
+      colorSpread: [0.05, 0.05, 0.05, 0.1],
       size: options.particleSize,
+      sizeSpread: options.particleSize * 0.3,
       velocity: [vx, vy, 0],
-      spread: 0.3,
+      velocitySpread: [Math.abs(vx) * spread, Math.abs(vy) * spread, 0],
+      mass: 1,
+      massSpread: 0,
     });
 
     // Add mid-point emitter for density
@@ -75,14 +82,21 @@ function emittersAlongPath(
     const midLat = (lat0 + lat1) / 2;
     const [mmx, mmy, mmz] = lngLatToMercator(midLng, midLat, 0);
 
+    const midSpread = 0.2;
     emitters.push({
       position: [mmx, mmy, mmz],
+      positionSpread: [midSpread * 0.0001, midSpread * 0.0001, 0],
       rate: options.rate * 0.6,
       lifetime: options.lifetime * 0.8,
+      lifetimeSpread: options.lifetime * 0.15,
       color: options.particleColor,
+      colorSpread: [0.03, 0.03, 0.03, 0.08],
       size: options.particleSize * 0.8,
+      sizeSpread: options.particleSize * 0.2,
       velocity: [vx, vy, 0],
-      spread: 0.2,
+      velocitySpread: [Math.abs(vx) * midSpread, Math.abs(vy) * midSpread, 0],
+      mass: 1,
+      massSpread: 0,
     });
   }
 

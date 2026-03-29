@@ -45,14 +45,9 @@ class OceanTurbulenceField implements FlowField {
 // ---------------------------------------------------------------------------
 
 function createPullbackScene(): SceneDescriptor {
-  const shot = CinematicCamera.crane(
-    ATLANTIC_CENTER,
-    3.0,   // start zoom (zoomed in from NYC)
-    2.2,   // end zoom (zoomed out for Atlantic)
-    40,    // start pitch
-    15,    // end pitch
-    -30,   // start bearing
-    10,    // end bearing
+  const shot = CinematicCamera.flyTo(
+    { center: [-73.985, 40.758], zoom: 3.0, pitch: 40, bearing: -30 },
+    { center: ATLANTIC_CENTER, zoom: 2.2, pitch: 15, bearing: 10 },
     PULLBACK_DURATION,
   );
 

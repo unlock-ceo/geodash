@@ -16,6 +16,9 @@ import { SceneRunner } from './SceneRunner';
 import type { ActDefinition } from './types';
 import { getAct1 } from './acts/Act1Globe';
 import { getAct2 } from './acts/Act2NYC';
+import { getAct3 } from './acts/Act3Environment';
+import { getAct4 } from './acts/Act4Live';
+import { getAct5 } from './acts/Act5Interactive';
 import { useDemoStore } from '../store/demoStore';
 import { getMapInstance, getParticleLayer } from '../components/Map/GlobeMap';
 
@@ -24,10 +27,11 @@ export class DemoOrchestrator {
   private acts: ActDefinition[];
   private abortController: AbortController | null = null;
   private running = false;
+  private currentActIdx = 0;
 
   constructor() {
     this.runner = new SceneRunner();
-    this.acts = [getAct1(), getAct2()];
+    this.acts = [getAct1(), getAct2(), getAct3(), getAct4(), getAct5()];
   }
 
   // -----------------------------------------------------------------------
@@ -78,6 +82,15 @@ export class DemoOrchestrator {
     await this.runFrom(idx);
   }
 
+  /**
+   * Skip to the next act. If currently on the last act, does nothing.
+   */
+  async skipNext(): Promise<void> {
+    const nextIdx = this.currentActIdx + 1;
+    if (nextIdx >= this.acts.length) return;
+    await this.skipToAct(nextIdx + 1); // skipToAct is 1-indexed
+  }
+
   /** True if the demo is currently playing. */
   isRunning(): boolean {
     return this.running;
@@ -86,6 +99,11 @@ export class DemoOrchestrator {
   /** Returns the number of registered acts. */
   getActCount(): number {
     return this.acts.length;
+  }
+
+  /** Returns current act index (0-based). */
+  getCurrentActIdx(): number {
+    return this.currentActIdx;
   }
 
   // -----------------------------------------------------------------------
@@ -121,6 +139,7 @@ export class DemoOrchestrator {
     for (let actIdx = startIdx; actIdx < this.acts.length; actIdx++) {
       if (signal.aborted) break;
 
+      this.currentActIdx = actIdx;
       const act = this.acts[actIdx]!;
       useDemoStore.getState().setCurrentAct(actIdx + 1);
       useDemoStore.getState().setActProgress(0);
