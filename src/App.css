@@ -1,0 +1,9 @@
+/* App-level styles — kept minimal; Tailwind + WebGL handle visuals */
+
+#geodash-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #0a0a0f;
+}
