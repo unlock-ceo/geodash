@@ -12,7 +12,7 @@ import { lngLatToMercator } from '../../engine/projection';
 // NYC geography
 // ---------------------------------------------------------------------------
 
-const NYC_BOUNDS = {
+export const NYC_BOUNDS = {
   minLng: -74.06,
   maxLng: -73.82,
   minLat: 40.63,
@@ -23,7 +23,7 @@ const NYC_BOUNDS = {
 const MANHATTAN_CENTER = { lng: -73.985, lat: 40.758 };
 
 /** Secondary hotspots to add interest. */
-const HOTSPOTS: { lng: number; lat: number; weight: number }[] = [
+export const HOTSPOTS: { lng: number; lat: number; weight: number }[] = [
   { lng: -73.985, lat: 40.758, weight: 1.0 },   // Times Square / Midtown
   { lng: -74.006, lat: 40.713, weight: 0.7 },   // Financial District
   { lng: -73.955, lat: 40.768, weight: 0.5 },   // Central Park East
@@ -91,7 +91,7 @@ function sampleRamp(t: number): [number, number, number] {
  * Uses a sum of Gaussians centred on known hotspots, plus a light
  * pseudo-random jitter so the grid has organic variation.
  */
-function activityAt(lng: number, lat: number): number {
+export function activityAt(lng: number, lat: number): number {
   let total = 0;
 
   for (const hs of HOTSPOTS) {
@@ -251,4 +251,31 @@ export function applyTemporalPulse(
     outColors[i4 + 2] = (baseColors[i4 + 2] ?? 0) * (1 - blend) + 0.15 * blend;
     outColors[i4 + 3] = Math.min(1.0, (baseColors[i4 + 3] ?? 0.5) + intensity * 0.4);
   }
+}
+
+// ---------------------------------------------------------------------------
+// LngLat pair generation (matching hex grid order)
+// ---------------------------------------------------------------------------
+
+/**
+ * Generate lng/lat pairs in the same order as generateNYCHexGrid.
+ * Lightweight pass that skips Mercator projection — used for pulse modulation.
+ */
+export function generateNYCLngLats(resolution: number = 0.003, _expectedCount?: number): Float32Array {
+  const dx = resolution;
+  const dy = resolution * Math.sqrt(3) / 2;
+
+  const pairs: number[] = [];
+  let row = 0;
+  for (let lat = NYC_BOUNDS.minLat; lat <= NYC_BOUNDS.maxLat; lat += dy) {
+    const offset = (row % 2 === 0) ? 0 : dx / 2;
+    for (let lng = NYC_BOUNDS.minLng + offset; lng <= NYC_BOUNDS.maxLng; lng += dx) {
+      const a = activityAt(lng, lat);
+      if (a < 0.02) continue;
+      pairs.push(lng, lat);
+    }
+    row++;
+  }
+
+  return new Float32Array(pairs);
 }

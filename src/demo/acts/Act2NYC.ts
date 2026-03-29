@@ -19,6 +19,7 @@ import { CinematicCamera } from '../../camera/CinematicCamera';
 import { easeInOutCubic } from '../../camera/easing';
 import {
   generateNYCHexGrid,
+  generateNYCLngLats,
   createTemporalPulse,
   applyTemporalPulse,
 } from '../synthetic/nycGrid';
@@ -210,67 +211,6 @@ function createPulseScene(): SceneDescriptor {
       workSizes = null;
     },
   };
-}
-
-// ---------------------------------------------------------------------------
-// Helper: regenerate lng/lat pairs matching generateNYCHexGrid order
-// ---------------------------------------------------------------------------
-
-const NYC_BOUNDS = {
-  minLng: -74.06,
-  maxLng: -73.82,
-  minLat: 40.63,
-  maxLat: 40.84,
-};
-
-/**
- * Regenerate the lng/lat pairs in the same order as generateNYCHexGrid.
- * This is a lightweight pass that skips the Mercator projection.
- */
-function generateNYCLngLats(resolution: number, _expectedCount: number): Float32Array {
-  const dx = resolution;
-  const dy = resolution * Math.sqrt(3) / 2;
-
-  const pairs: number[] = [];
-  let row = 0;
-  for (let lat = NYC_BOUNDS.minLat; lat <= NYC_BOUNDS.maxLat; lat += dy) {
-    const offset = (row % 2 === 0) ? 0 : dx / 2;
-    for (let lng = NYC_BOUNDS.minLng + offset; lng <= NYC_BOUNDS.maxLng; lng += dx) {
-      // Replicate the activity threshold from generateNYCHexGrid
-      const a = activityAtFast(lng, lat);
-      if (a < 0.02) continue;
-      pairs.push(lng, lat);
-    }
-    row++;
-  }
-
-  return new Float32Array(pairs);
-}
-
-// Inline fast activity check — mirrors nycGrid.ts logic
-const HOTSPOTS = [
-  { lng: -73.985, lat: 40.758, weight: 1.0 },
-  { lng: -74.006, lat: 40.713, weight: 0.7 },
-  { lng: -73.955, lat: 40.768, weight: 0.5 },
-  { lng: -73.944, lat: 40.728, weight: 0.45 },
-  { lng: -73.988, lat: 40.692, weight: 0.35 },
-  { lng: -73.913, lat: 40.774, weight: 0.3 },
-  { lng: -73.949, lat: 40.805, weight: 0.4 },
-];
-
-function activityAtFast(lng: number, lat: number): number {
-  let total = 0;
-  const cosLat = Math.cos(lat * Math.PI / 180);
-  for (const hs of HOTSPOTS) {
-    const dlng = (lng - hs.lng) * cosLat;
-    const dlat = lat - hs.lat;
-    const dist2 = dlng * dlng + dlat * dlat;
-    const sigma = 0.015;
-    total += hs.weight * Math.exp(-dist2 / (2 * sigma * sigma));
-  }
-  const hash = Math.sin(lng * 12345.6789 + lat * 98765.4321) * 43758.5453;
-  const jitter = (hash - Math.floor(hash)) * 0.15;
-  return Math.max(0, Math.min(1, total + jitter));
 }
 
 // ---------------------------------------------------------------------------
