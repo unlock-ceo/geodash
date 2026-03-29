@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import GlobeMap from './components/Map/GlobeMap';
+import DropZone from './ingestion/DropZone';
 import { DemoOrchestrator } from './demo/DemoOrchestrator';
 import './App.css';
 
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <div id="geodash-root">
       <GlobeMap />
+      <DropZone />
     </div>
   );
 }
