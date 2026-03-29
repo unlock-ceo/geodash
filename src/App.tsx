@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import GlobeMap from './components/Map/GlobeMap';
 import DropZone from './ingestion/DropZone';
 import DemoControls from './components/DemoControls';
+import CoordinateDisplay from './components/CoordinateDisplay';
+import ScaleBar from './components/ScaleBar';
 import { DemoOrchestrator } from './demo/DemoOrchestrator';
 import './App.css';
 
@@ -37,6 +39,8 @@ export default function App() {
       <GlobeMap />
       <DropZone />
       <DemoControls />
+      <CoordinateDisplay />
+      <ScaleBar />
     </div>
   );
 }
