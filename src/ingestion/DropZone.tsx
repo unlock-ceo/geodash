@@ -11,7 +11,8 @@ import type { ParseResult } from './types';
 import { useDataStore } from '../store/dataStore';
 import { getMapInstance, getParticleLayer } from '../components/Map/GlobeMap';
 import { lngLatToMercator } from '../engine/projection';
-import type { GeoFeature } from '../types/geo';
+import type { GeoDataset } from '../types/geo';
+import { profileAndStyle, styleFeature } from '../dataProfile/autoStyle';
 
 type DropState = 'hidden' | 'active' | 'hover' | 'parsing';
 
@@ -36,55 +37,70 @@ export default function DropZone() {
     }, duration);
   }, []);
 
-  const renderFeaturesAsParticles = useCallback((features: GeoFeature[]) => {
+  const renderDatasetAsParticles = useCallback((dataset: GeoDataset) => {
     const layer = getParticleLayer();
     if (!layer) return;
 
     const ps = layer.getParticleSystem();
-    const points: { lng: number; lat: number }[] = [];
+    const styleConfig = profileAndStyle(dataset);
 
-    for (const f of features) {
+    // Extract point coordinates from features
+    const pointData: { lng: number; lat: number; props: Record<string, unknown> }[] = [];
+    for (const f of dataset.features) {
       if (f.geometry.type === 'Point') {
         const [lng, lat] = f.geometry.coordinates;
-        points.push({ lng: lng!, lat: lat! });
+        pointData.push({ lng: lng!, lat: lat!, props: f.properties });
       } else if (f.geometry.type === 'MultiPoint') {
         for (const coord of f.geometry.coordinates) {
-          points.push({ lng: coord[0]!, lat: coord[1]! });
+          pointData.push({ lng: coord[0]!, lat: coord[1]!, props: f.properties });
         }
       } else if (f.geometry.type === 'LineString') {
         for (const coord of f.geometry.coordinates) {
-          points.push({ lng: coord[0]!, lat: coord[1]! });
+          pointData.push({ lng: coord[0]!, lat: coord[1]!, props: f.properties });
         }
       } else if (f.geometry.type === 'Polygon') {
         for (const ring of f.geometry.coordinates) {
           for (const coord of ring) {
-            points.push({ lng: coord[0]!, lat: coord[1]! });
+            pointData.push({ lng: coord[0]!, lat: coord[1]!, props: f.properties });
           }
         }
       }
     }
 
-    if (points.length === 0) return;
+    if (pointData.length === 0) return;
 
-    const count = points.length;
+    // Compute field range for color/size mapping
+    let fieldMin = Infinity;
+    let fieldMax = -Infinity;
+    const field = styleConfig.colorField || styleConfig.sizeField;
+    if (field) {
+      for (const p of pointData) {
+        const v = p.props[field];
+        if (typeof v === 'number') {
+          if (v < fieldMin) fieldMin = v;
+          if (v > fieldMax) fieldMax = v;
+        }
+      }
+    }
+
+    const count = pointData.length;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 4);
     const sizes = new Float32Array(count);
 
     for (let i = 0; i < count; i++) {
-      const p = points[i]!;
+      const p = pointData[i]!;
       const [mx, my, mz] = lngLatToMercator(p.lng, p.lat, 0);
       positions[i * 3] = mx;
       positions[i * 3 + 1] = my;
       positions[i * 3 + 2] = mz;
 
-      // Cyan accent color
-      colors[i * 4] = 0.31;
-      colors[i * 4 + 1] = 0.76;
-      colors[i * 4 + 2] = 0.97;
-      colors[i * 4 + 3] = 0.85;
-
-      sizes[i] = 4.0;
+      const { color, size } = styleFeature(styleConfig, p.props, fieldMin, fieldMax);
+      colors[i * 4] = color[0];
+      colors[i * 4 + 1] = color[1];
+      colors[i * 4 + 2] = color[2];
+      colors[i * 4 + 3] = color[3];
+      sizes[i] = size;
     }
 
     ps.setParticles(positions, colors, sizes);
@@ -117,7 +133,7 @@ export default function DropZone() {
     switch (result.status) {
       case 'complete':
         useDataStore.getState().addDataset(result.dataset);
-        renderFeaturesAsParticles(result.dataset.features);
+        renderDatasetAsParticles(result.dataset);
         flyToBounds(result.dataset.bounds.sw, result.dataset.bounds.ne);
         addToast(
           `Loaded ${result.dataset.features.length.toLocaleString()} features from ${file.name}`,
@@ -126,7 +142,7 @@ export default function DropZone() {
         break;
       case 'partial':
         useDataStore.getState().addDataset(result.dataset);
-        renderFeaturesAsParticles(result.dataset.features);
+        renderDatasetAsParticles(result.dataset);
         flyToBounds(result.dataset.bounds.sw, result.dataset.bounds.ne);
         addToast(
           `Loaded ${result.dataset.features.length.toLocaleString()} features — ${result.warnings.length} rows skipped`,
@@ -140,7 +156,7 @@ export default function DropZone() {
     }
 
     setState('hidden');
-  }, [addToast, renderFeaturesAsParticles, flyToBounds]);
+  }, [addToast, renderDatasetAsParticles, flyToBounds]);
 
   const handleDragEnter = useCallback((e: DragEvent) => {
     e.preventDefault();
