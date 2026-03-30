@@ -10,6 +10,7 @@ import { ingestFile } from './parsers';
 import type { ParseResult } from './types';
 import { useDataStore } from '../store/dataStore';
 import { getMapInstance, getParticleLayer } from '../components/Map/GlobeMap';
+import { getOrchestrator } from '../App';
 import { lngLatToMercator } from '../engine/projection';
 import type { GeoDataset } from '../types/geo';
 import { profileAndStyle, styleFeature } from '../dataProfile/autoStyle';
@@ -39,7 +40,10 @@ export default function DropZone() {
 
   const renderDatasetAsParticles = useCallback((dataset: GeoDataset) => {
     const layer = getParticleLayer();
-    if (!layer) return;
+    if (!layer) {
+      console.warn('[DropZone] ParticleLayer not ready — particles not rendered. Map may still be loading.');
+      return;
+    }
 
     const ps = layer.getParticleSystem();
     const styleConfig = profileAndStyle(dataset);
@@ -129,6 +133,11 @@ export default function DropZone() {
     setState('parsing');
 
     const result: ParseResult = await ingestFile(file);
+
+    // Stop the demo orchestrator so no further acts overwrite user particles
+    if (result.status === 'complete' || result.status === 'partial') {
+      getOrchestrator()?.stop();
+    }
 
     switch (result.status) {
       case 'complete':

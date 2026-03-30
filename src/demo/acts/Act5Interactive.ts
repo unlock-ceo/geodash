@@ -13,6 +13,7 @@ import type { ActDefinition, SceneContext, SceneDescriptor } from '../types';
 import { CinematicCamera } from '../../camera/CinematicCamera';
 import { easeInOutCubic } from '../../camera/easing';
 import { useDemoStore } from '../../store/demoStore';
+import { useDataStore } from '../../store/dataStore';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -50,9 +51,13 @@ function createInvitationScene(): SceneDescriptor {
       ctx.particleSystem.clearFlowFields();
       ctx.particleSystem.setPhysics({ gravity: 0, friction: 0.02, turbulence: 0 });
 
-      // Clear particle buffer for a clean globe
-      const empty = new Float32Array(0);
-      ctx.particleSystem.setParticles(empty, empty, empty);
+      // Only clear the particle buffer if the user hasn't dropped their own data.
+      // User data takes precedence over demo cleanup.
+      const hasUserData = useDataStore.getState().datasets.size > 0;
+      if (!hasUserData) {
+        const empty = new Float32Array(0);
+        ctx.particleSystem.setParticles(empty, empty, empty);
+      }
     },
 
     update(ctx: SceneContext, progress: number) {
