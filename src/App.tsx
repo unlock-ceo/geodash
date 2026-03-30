@@ -4,6 +4,7 @@ import DropZone from './ingestion/DropZone';
 import DemoControls from './components/DemoControls';
 import CoordinateDisplay from './components/CoordinateDisplay';
 import ScaleBar from './components/ScaleBar';
+import ResetNorthButton from './components/ResetNorthButton';
 import { DemoOrchestrator } from './demo/DemoOrchestrator';
 import './App.css';
 
@@ -41,6 +42,7 @@ export default function App() {
       <DemoControls />
       <CoordinateDisplay />
       <ScaleBar />
+      <ResetNorthButton />
     </div>
   );
 }
