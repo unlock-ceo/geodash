@@ -38,6 +38,10 @@
 
 - [x] Step 1: Stop demo on user data drop + guard Act 5 particle clear — committed in ece1c9a
 
+## UI Enhancements (Session 5 — 2026-03-30)
+
+- [x] Step 1: Add reset-to-north compass button — committed in 9dc197b
+
 ## Summary
 
 - **106 tests passing** across 6 test files (easing, camera, parsers, feeds, geodesic, schema)
