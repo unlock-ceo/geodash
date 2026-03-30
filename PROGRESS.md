@@ -34,6 +34,10 @@
 - [x] Step 1: Disable broken post-processing + fix vertex shader point-size attenuation — committed in 33af5f6
 - [x] Step 2: Add userInteracting flag to camera store, skip jumpTo in SceneRunner on user input — committed in 0b402c7
 
+## Bug Fixes (Session 4 — 2026-03-30)
+
+- [x] Step 1: Stop demo on user data drop + guard Act 5 particle clear — committed in ece1c9a
+
 ## Summary
 
 - **106 tests passing** across 6 test files (easing, camera, parsers, feeds, geodesic, schema)
